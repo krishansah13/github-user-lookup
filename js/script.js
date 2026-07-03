@@ -5,6 +5,7 @@ const search = document.getElementById('search-icon');
 search.addEventListener('click', async () => {
     const username = document.getElementById("search").value;
     const errorPara = document.getElementById('error-message');
+
     if (username === "") {
         errorPara.innerHTML = "The Username Cannot Be Empty";
         return;
@@ -12,8 +13,9 @@ search.addEventListener('click', async () => {
         errorPara.innerHTML = "";
     }
     const data = await searchData(username);
-    if (!data) {
+    if (!data || !username) {
         errorPara.innerHTML = "User Not Found";
+        document.getElementById("user-details").style.display = "none";
         return;
     }
     showData(data);
@@ -33,18 +35,28 @@ async function searchData(username) {
 }
 
 function showData(data) {
-    const userDetail = document.getElementById('user-detail');
+    const userDetail = document.getElementById('user-details');
+    userDetail.style.display = "flex";
     const avatar = document.getElementById('user-avatar');
     const githubDetails = document.getElementById('user-github-details');
 
     avatar.setAttribute("src", `${data.avatar_url}`);
-    
+
     const repos = document.getElementById("repos");
     const followers = document.getElementById("followers");
     const following = document.getElementById("following");
+    const userNameSelector = document.getElementById('username');
+    const userBio = document.getElementById('bio');
 
-    repos.innerHTML =`
-    <h3>Public Repositories</h3>
+    const username = data.name;
+    const userBioData = data.bio;
+
+    userNameSelector.innerHTML = `<h2>${username}</h2>`
+    if(!userBioData) userBio.style.display = null;
+    else userBio.innerHTML = `<i>${userBioData}</i>`
+
+    repos.innerHTML = `
+    <h3>Repositories</h3>
     ${data.public_repos}
     `
 
