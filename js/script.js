@@ -1,15 +1,20 @@
 const githubAPI = "https://api.github.com"
 
 const cards = document.getElementById("cards");
-const search = document.getElementById('search-icon');
+const filter = document.getElementById("filter");
 const loader = document.getElementById("loader");
-const errorPara = document.getElementById("error-message");
-const openedCard = document.getElementById('openedCard');
+const search = document.getElementById('search-icon');
 const searchInput = document.getElementById('search');
+const applyBtn = document.getElementById("applyFilter");
+const openedCard = document.getElementById('openedCard');
+const errorPara = document.getElementById("error-message");
 const userDetail = document.getElementById("user-details");
+const filterContainer = document.getElementById("filter-container");
 
 search.addEventListener("click", setData);
 searchInput.addEventListener('input', clearCards);
+
+filterContainer.style.display = "none";
 
 async function setData() {
     const username = document.getElementById("search").value.trim();
@@ -42,7 +47,7 @@ async function setData() {
             errorMsg = "User not found";
         } else if (result.status === "NETWORK_ERROR") {
             errorMsg = "No internet connection";
-        } else if(result.status === 403) {
+        } else if (result.status === 403) {
             errorMsg = "API RATE LIMIT EXCEEEDED"
         } else {
             errorMsg = "Unknown error";
@@ -130,19 +135,35 @@ function showData(data) {
         <i>${data.html_url}</i>
     `
 
+    let sortOrder = 0;
 
-    repos.onclick = () => showRepos(data, cards, openedCard);
+    applyBtn.onclick = () => {
+        showRepos(data, cards, openedCard);
+    };
+
+    repos.onclick = () => showRepos(data, cards, openedCard, sortOrder);
     followers.onclick = () => showFollowers(data, cards, openedCard);
     following.onclick = () => showFollowing(data, cards, openedCard);
 }
 
 async function showRepos(data, cards, openedCard) {
 
+
+    filterContainer.style.display = "flex";
+
     cards.style.display = "none";
     loader.style.display = "block";
 
     const response = await fetch(data.repos_url);
     const repos = await response.json();
+
+    if (filter.value === "asc") {
+        repos.sort((a, b) => a.stargazers_count - b.stargazers_count);
+    } else if (filter.value === "desc") {
+        repos.sort((a, b) => b.stargazers_count - a.stargazers_count);
+    }
+
+    console.log(repos);
 
     loader.style.display = "none";
     cards.style.display = "grid";
@@ -155,6 +176,7 @@ async function showRepos(data, cards, openedCard) {
         cards.innerHTML += `
             <div class="repo-card">
                 <h3>${repo.name}</h3>
+                <p>${repo.stargazers_count} stars</p>
                 <br>
                 <p>${repo.description || "No description available"}</p>
                 <a href="${repo.html_url}" target="_blank">
@@ -168,6 +190,8 @@ async function showRepos(data, cards, openedCard) {
 async function showFollowers(data, cards, openedCard) {
 
     cards.style.display = "none";
+    
+    filterContainer.style.display = "none";
     loader.style.display = "block";
 
     const response = await fetch(data.followers_url);
@@ -179,7 +203,6 @@ async function showFollowers(data, cards, openedCard) {
     openedCard.innerHTML = "<h2>Followers</h2>"
 
     cards.innerHTML = "";
-
 
     followers.forEach(user => {
         cards.innerHTML += `
@@ -197,6 +220,8 @@ async function showFollowers(data, cards, openedCard) {
 async function showFollowing(data, cards, openedCard) {
 
     cards.style.display = "none";
+
+    filterContainer.style.display = "none";
     loader.style.display = "block";
 
     const response = await fetch(
@@ -227,6 +252,7 @@ async function showFollowing(data, cards, openedCard) {
 }
 
 function clearCards() {
+    filterContainer.style.display = "none";
     cards.innerHTML = "";
     userDetail.style.display = "none";
     errorPara.innerHTML = "";
