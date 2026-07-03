@@ -1,9 +1,11 @@
 const githubAPI = "https://api.github.com"
 
+const cards = document.getElementById("cards");
 const search = document.getElementById('search-icon');
 const loader = document.getElementById("loader");
+const errorPara = document.getElementById("error-message");
+const openedCard = document.getElementById('openedCard');
 const searchInput = document.getElementById('search');
-const cards = document.getElementById("cards");
 const userDetail = document.getElementById("user-details");
 
 search.addEventListener("click", setData);
@@ -11,7 +13,6 @@ searchInput.addEventListener('input', () => clearCards());
 
 async function setData() {
     const username = document.getElementById("search").value.trim();
-    const errorPara = document.getElementById("error-message");
 
     if (username === "") {
         errorPara.innerHTML = "The Username Cannot Be Empty";
@@ -23,6 +24,9 @@ async function setData() {
 
     cards.innerHTML = "";
     cards.style.display = "none";
+    
+    openedCard.innerHTML = "";
+    openedCard.style.display = "none";
 
     userDetail.style.display = "none";
     loader.style.display = "block";
@@ -103,12 +107,14 @@ function showData(data) {
     profileUrl.innerHTML = `
         <i>${data.html_url}</i>
     `
-    repos.onclick = () => showRepos(data, cards);
-    followers.onclick = () => showFollowers(data, cards);
-    following.onclick = () => showFollowing(data, cards);
+    
+
+    repos.onclick = () => showRepos(data, cards, openedCard);
+    followers.onclick = () => showFollowers(data, cards, openedCard);
+    following.onclick = () => showFollowing(data, cards, openedCard);
 }
 
-async function showRepos(data, cards) {
+async function showRepos(data, cards,openedCard) {
 
     cards.style.display = "none";
     loader.style.display = "block";
@@ -118,6 +124,8 @@ async function showRepos(data, cards) {
 
     loader.style.display = "none";
     cards.style.display = "grid";
+    openedCard.style.display = "block";
+    openedCard.innerHTML = "<h2>Repositories</h2>"
 
     cards.innerHTML = "";
 
@@ -135,7 +143,7 @@ async function showRepos(data, cards) {
     });
 }
 
-async function showFollowers(data, cards) {
+async function showFollowers(data, cards,openedCard) {
 
     cards.style.display = "none";
     loader.style.display = "block";
@@ -145,6 +153,8 @@ async function showFollowers(data, cards) {
 
     loader.style.display = "none";
     cards.style.display = "grid";
+    openedCard.style.display = "block";
+    openedCard.innerHTML = "<h2>Followers</h2>"
 
     cards.innerHTML = "";
 
@@ -162,7 +172,7 @@ async function showFollowers(data, cards) {
     });
 }
 
-async function showFollowing(data, cards) {
+async function showFollowing(data, cards,openedCard) {
 
     cards.style.display = "none";
     loader.style.display = "block";
@@ -175,6 +185,9 @@ async function showFollowing(data, cards) {
 
     loader.style.display = "none";
     cards.style.display = "grid";
+    openedCard.style.display = "block";
+
+    openedCard.innerHTML = "<h2>Following</h2>"
 
     cards.innerHTML = "";
 
@@ -193,9 +206,9 @@ async function showFollowing(data, cards) {
 
 function clearCards() {
     if (searchInput.value.trim() === "") {
-        document.getElementById("cards").innerHTML = "";
-        document.getElementById("user-details").style.display = "none";
-        document.getElementById("cards").innerHTML = "";
-        document.getElementById("error-message").innerHTML = "";
+        cards.innerHTML = "";
+        userDetail.style.display = "none";
+        errorPara.innerHTML = "";
+        openedCard.innerHTML = "";
     }
 }
