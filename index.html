@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Github User LookUp</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>
+            Github User Lookup
+        </h1>
+    </header>
+    
+    <div id = "search-bar">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwPs4aLjB6PrVFbGobXz0h7wluc7p07sCyaPnyTHvWSA&s=10" alt="github-icon" id = "github-icon">
+        <input type="text" id = "search" placeholder="Enter the GitHub Username here..">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpHKaQbpWFmxE-v4lp-HM2RWwHYAKugaSPGr0OopPyhhhv9O8X8oN2cRI&s=10" alt="search-icon" id = "search-icon">
+    </div>
+    <p id = "error-message"></p>
+
+    <div id="loader"></div>
+
+    <div id = "user-details">
+
+        <div id = "user-github-details">
+            <div id="img-name">
+                <img src="" alt="" id ="user-avatar">
+                <div id = "user-name-bio">
+                    <h2 id = "username"></h2>
+                    <p id = "bio"></p>
+                </div>
+            </div>
+
+            <div id = "details">
+                <div id = "repos"></div>
+                <div id = "followers"></div>
+                <div id = "following"></div>
+            </div>
+
+            <div id = "profile-url-section">
+                <p>Profile Url : </p>
+                <a href ="" id ="profile-url"></a>
+            </div>
+            <p id ="joinedOn"></p>
+        </div>
+
+    </div>
+
+    
+    <div id="loader"></div>
+    
+    <div id = "openedCard"></div>
+    <div id = "cards"></div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
