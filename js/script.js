@@ -9,7 +9,7 @@ const searchInput = document.getElementById('search');
 const userDetail = document.getElementById("user-details");
 
 search.addEventListener("click", setData);
-searchInput.addEventListener('input', () => clearCards());
+searchInput.addEventListener('input', clearCards);
 
 async function setData() {
     const username = document.getElementById("search").value.trim();
@@ -24,23 +24,36 @@ async function setData() {
 
     cards.innerHTML = "";
     cards.style.display = "none";
-    
+
     openedCard.innerHTML = "";
     openedCard.style.display = "none";
 
     userDetail.style.display = "none";
     loader.style.display = "block";
 
-    const data = await searchData(username);
+    const result = await searchData(username);
 
     loader.style.display = "none";
 
-    if (!data) {
-        errorPara.innerHTML = "User Not Found";
+    let errorMsg;
+
+    if (!result.success) {
+        if (result.status === 404) {
+            errorMsg = "User not found";
+        } else if (result.status === "NETWORK_ERROR") {
+            errorMsg = "No internet connection";
+        } else if(result.status === 403) {
+            errorMsg = "API RATE LIMIT EXCEEEDED"
+        } else {
+            errorMsg = "Unknown error";
+            console.error(result.message);
+        }
+        errorPara.innerHTML = errorMsg;
         return;
     }
 
-    showData(data);
+    showData(result.data);
+
 }
 // search.removeEventListener('click', setData);
 
@@ -48,12 +61,21 @@ async function searchData(username) {
     try {
         const response = await fetch(`${githubAPI}/users/${username}`);
         if (!response.ok) {
-            return null;
+            return {
+                success: false,
+                status: response.status
+            };
         }
-        return await response.json();
+        return {
+            success: true,
+            data: await response.json()
+        };
     } catch (err) {
-        console.error(err);
-        return null;
+        return {
+            success: false,
+            status: "NETWORK_ERROR",
+            message: err.message
+        };
     }
 }
 
@@ -107,14 +129,14 @@ function showData(data) {
     profileUrl.innerHTML = `
         <i>${data.html_url}</i>
     `
-    
+
 
     repos.onclick = () => showRepos(data, cards, openedCard);
     followers.onclick = () => showFollowers(data, cards, openedCard);
     following.onclick = () => showFollowing(data, cards, openedCard);
 }
 
-async function showRepos(data, cards,openedCard) {
+async function showRepos(data, cards, openedCard) {
 
     cards.style.display = "none";
     loader.style.display = "block";
@@ -143,7 +165,7 @@ async function showRepos(data, cards,openedCard) {
     });
 }
 
-async function showFollowers(data, cards,openedCard) {
+async function showFollowers(data, cards, openedCard) {
 
     cards.style.display = "none";
     loader.style.display = "block";
@@ -172,7 +194,7 @@ async function showFollowers(data, cards,openedCard) {
     });
 }
 
-async function showFollowing(data, cards,openedCard) {
+async function showFollowing(data, cards, openedCard) {
 
     cards.style.display = "none";
     loader.style.display = "block";
@@ -205,10 +227,9 @@ async function showFollowing(data, cards,openedCard) {
 }
 
 function clearCards() {
-    if (searchInput.value.trim() === "") {
-        cards.innerHTML = "";
-        userDetail.style.display = "none";
-        errorPara.innerHTML = "";
-        openedCard.innerHTML = "";
-    }
+    cards.innerHTML = "";
+    userDetail.style.display = "none";
+    errorPara.innerHTML = "";
+    openedCard.innerHTML = "";
+    openedCard.style.display = "none";
 }
