@@ -1,13 +1,17 @@
 const githubAPI = "https://api.github.com"
 
 const search = document.getElementById('search-icon');
-
 const loader = document.getElementById("loader");
+const searchInput = document.getElementById('search');
+const cards = document.getElementById("cards");
+const userDetail = document.getElementById("user-details");
 
-search.addEventListener("click", async () => {
+search.addEventListener("click", setData);
+searchInput.addEventListener('input', () => clearCards());
+
+async function setData() {
     const username = document.getElementById("search").value.trim();
     const errorPara = document.getElementById("error-message");
-    const userDetail = document.getElementById("user-details");
 
     if (username === "") {
         errorPara.innerHTML = "The Username Cannot Be Empty";
@@ -17,13 +21,14 @@ search.addEventListener("click", async () => {
 
     errorPara.innerHTML = "";
 
-    // Hide previous card and show loader
+    cards.innerHTML = "";
+    cards.style.display = "none";
+
     userDetail.style.display = "none";
     loader.style.display = "block";
 
     const data = await searchData(username);
 
-    // Hide loader after fetch finishes
     loader.style.display = "none";
 
     if (!data) {
@@ -32,7 +37,8 @@ search.addEventListener("click", async () => {
     }
 
     showData(data);
-});
+}
+// search.removeEventListener('click', setData);
 
 async function searchData(username) {
     try {
@@ -66,10 +72,10 @@ function showData(data) {
     const username = data.name || data.login;
     const userBioData = data.bio;
 
-    userNameSelector.innerHTML = `<h2>${username}</h2>`
-  userBio.innerHTML = userBioData
-                                    ? `<i>${userBioData}</i>`
-                                    : "<i>No bio available</i>"
+    userNameSelector.textContent = `${username}`
+    userBio.innerHTML = userBioData
+        ? `<i>${userBioData}</i>`
+        : "<i>No bio available</i>"
 
     let joiningDate = data.created_at;
     joiningDate = joiningDate.slice(0, 10);
@@ -97,4 +103,99 @@ function showData(data) {
     profileUrl.innerHTML = `
         <i>${data.html_url}</i>
     `
+    repos.onclick = () => showRepos(data, cards);
+    followers.onclick = () => showFollowers(data, cards);
+    following.onclick = () => showFollowing(data, cards);
+}
+
+async function showRepos(data, cards) {
+
+    cards.style.display = "none";
+    loader.style.display = "block";
+
+    const response = await fetch(data.repos_url);
+    const repos = await response.json();
+
+    loader.style.display = "none";
+    cards.style.display = "grid";
+
+    cards.innerHTML = "";
+
+    repos.forEach(repo => {
+        cards.innerHTML += `
+            <div class="repo-card">
+                <h3>${repo.name}</h3>
+                <br>
+                <p>${repo.description || "No description available"}</p>
+                <a href="${repo.html_url}" target="_blank">
+                    View Repository
+                </a>
+            </div>
+        `;
+    });
+}
+
+async function showFollowers(data, cards) {
+
+    cards.style.display = "none";
+    loader.style.display = "block";
+
+    const response = await fetch(data.followers_url);
+    const followers = await response.json();
+
+    loader.style.display = "none";
+    cards.style.display = "grid";
+
+    cards.innerHTML = "";
+
+
+    followers.forEach(user => {
+        cards.innerHTML += `
+            <div class="user-card">
+                <img src="${user.avatar_url}" alt="${user.login}">
+                <h3>${user.login}</h3>
+                <a href="${user.html_url}" target="_blank">
+                    Visit Profile
+                </a>
+            </div>
+        `;
+    });
+}
+
+async function showFollowing(data, cards) {
+
+    cards.style.display = "none";
+    loader.style.display = "block";
+
+    const response = await fetch(
+        `${githubAPI}/users/${data.login}/following`
+    );
+
+    const following = await response.json();
+
+    loader.style.display = "none";
+    cards.style.display = "grid";
+
+    cards.innerHTML = "";
+
+    following.forEach(user => {
+        cards.innerHTML += `
+            <div class="user-card">
+                <img src="${user.avatar_url}" alt="${user.login}">
+                <h3>${user.login}</h3>
+                <a href="${user.html_url}" target="_blank">
+                    Visit Profile
+                </a>
+            </div>
+        `;
+    });
+}
+
+function clearCards() {
+    if (searchInput.value.trim() === "") {
+        document.getElementById("cards").innerHTML = "";
+        document.getElementById("user-details").style.display = "none";
+        document.getElementById("cards").innerHTML = "";
+        document.getElementById("error-message").innerHTML = "";
+    }
 }
